@@ -1,0 +1,68 @@
+# Gradle
+.gradle
+**/build/
+!src/**/build/
+.kotlin
+local.properties
+
+# IntelliJ / Android Studio / Fleet
+.idea
+*.iml
+.fleet/
+out/
+captures
+.externalNativeBuild
+.cxx
+*.hprof
+
+# macOS
+.DS_Store
+
+# Editors
+*~
+*.swp
+
+# Xcode
+xcuserdata
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+*.xcuserstate
+DerivedData/
+
+# Swift Package Manager
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+# Package.resolved is committed on purpose to lock SPM dependency versions
+
+# CocoaPods (currently unused, kept as a guard)
+Pods/
+
+# Android packaging artifacts
+*.apk
+*.aab
+*.ap_
+
+# iOS packaging artifacts
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Compiled output
+bin/
+gen/
+*.class
+*.dex
+
+# Signing & secrets — never commit
+*.keystore
+*.jks
+keystore.properties
+*.cer
+*.p12
+*.mobileprovision
+
+# Web / Node (for future web target)
+node_modules/
