@@ -1,62 +1,86 @@
 # Gradle
-.gradle
+.gradle/
 **/build/
-!src/**/build/
-.kotlin
+!**/src/**/build/          # keep source dirs literally named "build"
+.gradletasknamecache
+gradle-app.setting
+
+# Keep the Gradle wrapper committed (guard against any global *.jar ignore)
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Kotlin 2.x build/session data (KMP, Kotlin/Native)
+.kotlin/
+
+# Local machine config (SDK path, etc.) — never commit
 local.properties
 
-# IntelliJ / Android Studio / Fleet
-.idea
+# ── IDEs ──
+# IntelliJ IDEA / Android Studio
+.idea/
 *.iml
-.fleet/
+*.iws
+*.ipr
 out/
-captures
-.externalNativeBuild
-.cxx
+
+# JetBrains Fleet
+.fleet/
+
+# Android Studio native build / profiling
+captures/
+.externalNativeBuild/
+.cxx/
 *.hprof
 
-# macOS
+# ── OS / Editors ──
 .DS_Store
-
-# Editors
 *~
 *.swp
 
-# Xcode
+# ── Android ──
+*.log
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Firebase config: contains project IDs (not server secrets). Uncomment to ignore.
+# google-services.json
+
+# ── iOS / Xcode ──
 xcuserdata
+*.xcuserstate
+*.hmap
+DerivedData/
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
-*.xcuserstate
-DerivedData/
-
-# Swift Package Manager
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-# Package.resolved is committed on purpose to lock SPM dependency versions
-
-# CocoaPods (currently unused, kept as a guard)
-Pods/
-
-# Android packaging artifacts
-*.apk
-*.aab
-*.ap_
 
 # iOS packaging artifacts
 *.ipa
 *.dSYM
 *.dSYM.zip
 
-# Compiled output
+# Swift Package Manager (Package.resolved is committed on purpose to lock versions)
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.build/
+
+# CocoaPods (currently unused, kept as a guard)
+Pods/
+
+# Carthage (currently unused, kept as a guard)
+Carthage/Build/
+
+# ── Compiled output ──
 bin/
 gen/
 *.class
-*.dex
 
-# Signing & secrets — never commit
+# ── Signing & secrets — never commit ──
 *.keystore
 *.jks
 keystore.properties
@@ -64,5 +88,7 @@ keystore.properties
 *.p12
 *.mobileprovision
 
-# Web / Node (for future web target)
+# ── Web / Node (for a future web/wasm target) ──
 node_modules/
+
+# Note: when you add a web target, COMMIT kotlin-js-store/yarn.lock to lock JS dependency versions.

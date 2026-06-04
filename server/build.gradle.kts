@@ -1,20 +1,16 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
-    application
 }
 
 group = "com.flyingwhale.ecommerce"
 version = "1.0.0"
 application {
-    mainClass.set("com.flyingwhale.ecommerce.ApplicationKt")
-    
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    mainClass = "com.flyingwhale.ecommerce.ApplicationKt"
 }
 
 dependencies {
-    implementation(projects.shared)
+    api(projects.core)
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
