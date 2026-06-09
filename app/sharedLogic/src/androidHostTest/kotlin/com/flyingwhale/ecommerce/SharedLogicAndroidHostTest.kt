@@ -7,6 +7,9 @@ class SharedLogicAndroidHostTest {
 
     @Test
     fun example() {
-        assertEquals(3, 1 + 2)
+        assertEquals(DUMMY_EXPECTED_RESULT, DUMMY_ACTUAL_RESULT)
     }
 }
+
+private const val DUMMY_EXPECTED_RESULT = 3
+private const val DUMMY_ACTUAL_RESULT = 1 + 2
