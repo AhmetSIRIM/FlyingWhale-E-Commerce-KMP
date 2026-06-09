@@ -1,0 +1,21 @@
+# Bundles this repo's CI build toolchain: Amazon Corretto 21 (matching
+# gradle/gradle-daemon-jvm.properties: toolchainVendor=AMAZON, toolchainVersion=21, so
+# Gradle reuses this JDK instead of provisioning one via foojay) and Gradle via
+# gradle/actions/setup-gradle, which validates the wrapper and caches Gradle User Home
+# by default.
+#
+# Checkout is intentionally NOT bundled here: GitHub's local-action resolver reads this
+# action.yml off the runner filesystem before running it, so each calling job must run
+# actions/checkout first, then invoke this composite.
+name: Set up KMP build toolchain
+description: Configure Amazon Corretto 21 and Gradle (wrapper validation + caching).
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK 21 (Amazon Corretto)
+      uses: actions/setup-java@v5
+      with:
+        distribution: corretto
+        java-version: '21'
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v6

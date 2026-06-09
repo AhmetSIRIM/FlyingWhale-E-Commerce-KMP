@@ -1,0 +1,57 @@
+# Minimal PR gate (Phase 0). Architecture-agnostic: uses root-level lifecycle/aggregate
+# tasks (assemble, lint, detektAll), never a hardcoded module list, so new modules and
+# targets are covered automatically without editing this file.
+#
+# Three independent jobs so a red check names its own cause (compile vs Android lint vs
+# detekt) instead of one opaque "build failed". Test/coverage gates come in a later phase.
+name: PR Check
+
+# Unfiltered: every PR runs this, including the PR that introduces the workflow itself.
+on:
+  pull_request:
+
+# Cancel superseded runs on the same PR when a new commit lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: this workflow only needs to read the repo.
+permissions:
+  contents: read
+
+jobs:
+  assemble:
+    name: Assemble (compile + warnings-as-errors)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up build environment
+        uses: ./.github/actions/setup-kmp
+      # `assemble` compiles every module's main artifacts. allWarningsAsErrors (set in the
+      # root build) makes this a cross-platform compiler-warning gate. iOS targets are
+      # skipped automatically on a non-macOS host.
+      - name: Assemble
+        run: ./gradlew assemble --stacktrace
+
+  lint:
+    name: Android Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up build environment
+        uses: ./.github/actions/setup-kmp
+      - name: Android Lint
+        run: ./gradlew lint --stacktrace
+
+  detekt:
+    name: Detekt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up build environment
+        uses: ./.github/actions/setup-kmp
+      - name: Detekt (all source sets)
+        run: ./gradlew detektAll --stacktrace
