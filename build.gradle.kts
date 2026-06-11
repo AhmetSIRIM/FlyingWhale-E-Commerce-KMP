@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
-
 plugins {
     // this is necessary to avoid the plugins to be loaded multiple times
     // in each subproject's classloader
@@ -18,9 +16,17 @@ plugins {
 val detektFormatting = libs.detekt.formatting
 
 // TODO (Ahmet SIRIM): migrate this subprojects {} wiring to a build-logic convention plugin
-//  (precompiled script plugin) so each module does plugins { id("...") } instead of
-//  apply(plugin = ...); subprojects {} breaks project isolation, weakens the configuration
-//  cache, and triggers the IDE "apply plugin syntax is older" warning.
+//  (precompiled script plugin) so each module does plugins { id("...") }. subprojects {} is a
+//  cross-project block with no type-safe DSL accessors, which forces three symptoms below:
+//   1. apply(plugin = "...") instead of the plugins {} DSL -> IDE "apply syntax is older" warning.
+//   2. stringly-typed "detektPlugins"(...) instead of the typed detektPlugins(...) accessor.
+//   3. the `libs` version-catalog accessor is unavailable here, forcing detektFormatting to be
+//      resolved outside the block (below).
+//  It also breaks project isolation and weakens the configuration cache.
+//  A convention plugin fixes 1 and 2 cleanly (plugin applied in the same precompiled script ->
+//  plugins {} DSL + typed accessors). Symptom 3 is only traded, not removed: `libs` is also
+//  unavailable inside precompiled script plugins, so it needs a separate workaround there
+//  (e.g. add the catalog to build-logic and read it via VersionCatalogsExtension).
 subprojects {
     // Apply detekt to every module so new modules are covered automatically.
     apply(plugin = "io.gitlab.arturbosch.detekt")
@@ -44,12 +50,10 @@ subprojects {
         include("**/*.kt") // Kotlin sources only
     }
 
-    // Treat every compiler warning as an error on all targets (deprecated/unused/etc.),
-    // and silence the project-wide expect/actual Beta warning so it doesn't trip the gate.
-    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    // Treat every compiler warning as an error on all targets (deprecated/unused/etc.).
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
         compilerOptions {
             allWarningsAsErrors.set(true)
-            freeCompilerArgs.add("-Xexpect-actual-classes")
         }
     }
 }
