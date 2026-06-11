@@ -1,0 +1,36 @@
+# Overrides on top of detekt's shipped defaults (buildUponDefaultConfig = true). Only rules that
+# conflict with IDE / framework / KMP conventions are relaxed; the rest of detekt stays at full strength.
+
+formatting:
+  active: true
+  # ktlint indentation conflicts with the IntelliJ / Android Studio formatter:
+  Indentation:
+    active: false
+
+naming:
+  # Compose @Composable functions are PascalCase by convention, not camelCase:
+  FunctionNaming:
+    ignoreAnnotated: [ 'Composable' ]
+  # KMP convention puts platform impls in <Base>.<target>.kt (e.g., IOSPlatform lives in
+  # Platform.ios.kt), so the file name intentionally differs from its single top-level
+  # declaration. Exclude only those target-suffixed files; keep the rule active everywhere else.
+  # Source: https://kotlinlang.org/docs/coding-conventions.html#multiplatform-projects
+  MatchingDeclarationName:
+    excludes: [ '**/*.android.kt', '**/*.ios.kt', '**/*.jvm.kt', '**/*.js.kt', '**/*.wasmJs.kt' ]
+
+complexity:
+  # Composables routinely have many parameters; raise threshold and ignore defaults:
+  LongParameterList:
+    functionThreshold: 10
+    ignoreDefaultParameters: true
+  # @Preview functions are not production code:
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: [ 'Preview' ]
+
+style:
+  # @Preview functions are intentionally unused from production call sites:
+  UnusedPrivateMember:
+    ignoreAnnotated: [ 'Preview' ]
+  # FinalNewline (formatting/ktlint) already enforces this; disabled here to avoid duplicate reporting:
+  NewLineAtEndOfFile:
+    active: false
