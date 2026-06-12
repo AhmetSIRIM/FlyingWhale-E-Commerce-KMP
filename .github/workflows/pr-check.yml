@@ -1,12 +1,12 @@
-# Minimal PR gate (Phase 0). Architecture-agnostic: uses root-level lifecycle/aggregate
-# tasks (assemble, lint, detektAll), never a hardcoded module list, so new modules and
-# targets are covered automatically without editing this file.
+# Code-health gate. The platform matrix gives every target its own check and log,
+# lint/detekt run alongside, and everything joins in `ci-gate`, the single
+# code-health check branch protection requires. Gradle task names are used without
+# module paths, so new modules are covered automatically.
 #
-# Three independent jobs so a red check names its own cause (compile vs Android lint vs
-# detekt) instead of one opaque "build failed". Test/coverage gates come in a later phase.
+# The process gate (require-linked-issue) lives in its own workflow file because
+# its trigger differs (`edited`) and `needs:` cannot cross workflow files.
 name: PR Check
 
-# Unfiltered: every PR runs this, including the PR that introduces the workflow itself.
 on:
   pull_request:
 
@@ -20,23 +20,48 @@ permissions:
   contents: read
 
 jobs:
-  assemble:
-    name: Assemble (compile + warnings-as-errors)
+  platforms:
+    name: Platform (${{ matrix.platform }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # fail-fast off: each leg is an independent verdict on its own platform, not
+      # a stage of one build, so one red must not cancel the rest; all platform
+      # feedback arrives in a single round.
+      fail-fast: false
+      matrix:
+        include:
+          - platform: android
+            task: assembleDebug
+          # compileKotlinJvm covers KMP modules' jvm target; compileKotlin covers
+          # plain kotlin-jvm modules (the server). If the last plain kotlin-jvm
+          # module ever goes away, Gradle fails this leg with "task not found";
+          # drop compileKotlin from the list then.
+          - platform: jvm
+            task: compileKotlinJvm compileKotlin
+          # Web legs build the distribution (not just compile) so bundling is
+          # gated too; bundling failures do not surface at the compile level.
+          - platform: web-js
+            task: jsBrowserDistribution
+          - platform: web-wasm
+            task: wasmJsBrowserDistribution
+          # TODO(#6): move this leg to macos-latest and add linkDebugFramework*
+          #  (and iOS tests) once the iosApp is wired into Gradle/CI. Until then
+          #  it gates iOS source sets at klib level, which a linux host can do.
+          - platform: ios
+            task: compileKotlinIosArm64 compileKotlinIosSimulatorArm64
     steps:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Set up build environment
         uses: ./.github/actions/setup-kmp
-      # `assemble` compiles every module's main artifacts. allWarningsAsErrors (set in the
-      # root build) makes this a cross-platform compiler-warning gate. iOS targets are
-      # skipped automatically on a non-macOS host.
-      - name: Assemble
-        run: ./gradlew assemble --stacktrace
+      - name: Build (${{ matrix.platform }})
+        run: ./gradlew ${{ matrix.task }} --stacktrace
 
   lint:
     name: Android Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -48,6 +73,7 @@ jobs:
   detekt:
     name: Detekt
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -55,3 +81,24 @@ jobs:
         uses: ./.github/actions/setup-kmp
       - name: Detekt (all source sets)
         run: ./gradlew detektAll --stacktrace
+
+  # Join node, not a concern of its own: the needs list IS its function. It waits
+  # for every code-health job and reduces their results to one stable required-check
+  # name, so adding a job only ever touches this list, never branch protection.
+  ci-gate:
+    name: ci-gate
+    needs: [platforms, lint, detekt]
+    # A required check skipped via `if:` counts as satisfied, so any condition
+    # that can skip this job on a failed or cancelled dependency would leave the
+    # PR mergeable without CI. always() keeps the gate running; the step below
+    # turns bad dependency results into a failure.
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # needs.*.result (not an explicit list) so a job added to needs above is
+      # covered automatically; an explicit list forgotten here would let a red
+      # job pass the gate silently.
+      - name: Fail unless every job succeeded
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}
+        run: exit 1

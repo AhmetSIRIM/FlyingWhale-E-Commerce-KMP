@@ -1,0 +1,40 @@
+# Process gate, separate from PR Check on purpose: this check's source of truth is
+# the PR description, so it listens to `edited` and re-runs when the description
+# changes, while build jobs must not. `needs:` cannot cross workflow files, so it
+# stands as its own required check next to ci-gate.
+name: PR Linked Issue
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: only reads PR metadata; no checkout needed.
+permissions:
+  pull-requests: read
+
+jobs:
+  require-linked-issue:
+    name: require-linked-issue
+    # Bot PRs (Renovate/Dependabot) open no issue. A required check skipped via
+    # `if:` counts as satisfied, so bots merge without special-casing elsewhere.
+    if: ${{ !endsWith(github.actor, '[bot]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check the PR description references an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # The body is read via the API, not the frozen event payload, so even a
+        # manual re-run sees the current description.
+        run: |
+          body="$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq '.body // ""')"
+          if printf '%s' "$body" | grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+'; then
+            echo "Linked issue found."
+          else
+            echo "::error::No linked issue in the PR description. Add a closing keyword (e.g. \"Closes #42\"); this check re-runs automatically when the description is edited."
+            exit 1
+          fi
