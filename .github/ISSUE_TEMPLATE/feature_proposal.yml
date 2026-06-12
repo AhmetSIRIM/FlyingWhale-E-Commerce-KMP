@@ -1,0 +1,48 @@
+name: Feature proposal
+description: Propose a new feature, enhancement, or dev-process improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the proposal. Please search existing issues first to avoid duplicates.
+        Keep each field short and focused; concise proposals get reviewed faster.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What limitation or need does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What should be built, and roughly how?
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Platform scope
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Web (js)
+        - Web (wasmJs)
+        - Server
+        - Shared / KMP common
+        - Dev-process / CI
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches and why they were not chosen.
+  - type: textarea
+    id: references
+    attributes:
+      label: References / prior art
+      description: "Optional: links to similar implementations, docs, or designs that inspired this."

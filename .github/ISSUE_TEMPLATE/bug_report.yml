@@ -1,0 +1,65 @@
+name: Bug report
+description: Something doesn't work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search existing issues first to avoid duplicates.
+        Keep each field short and focused; concise reports get triaged faster.
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Affected platform(s)
+      description: Where does the bug occur?
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Web (js)
+        - Web (wasmJs)
+        - Server
+        - Shared / KMP common
+        - Build / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: What happens?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "e.g. Pixel 9 / Android 16, iPhone 16 / iOS 18.4, Chrome 137, JVM 21"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / stack trace
+      description: Paste only the relevant part (for very long logs, link a gist instead). Rendered as code automatically.
+      render: text
+  - type: textarea
+    id: possible-solution
+    attributes:
+      label: Possible solution
+      description: "Optional: if you have an idea of the cause or a fix, share it."
