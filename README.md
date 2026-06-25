@@ -1,54 +1,64 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Server.
+# FlyingWhale
 
-* [/app/iosApp](./app/iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+[![PR Check](https://github.com/AhmetSIRIM/FlyingWhale-E-Commerce-KMP/actions/workflows/pr-check.yml/badge.svg)](https://github.com/AhmetSIRIM/FlyingWhale-E-Commerce-KMP/actions/workflows/pr-check.yml)
 
-* [/app/sharedLogic](./app/sharedLogic/src) is for the code that will be shared between app targets in the project.
-  The most important subfolder is [commonMain](./app/sharedLogic/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+Kotlin Multiplatform e-commerce app, grown into an open-source dev-process showcase.
 
-* [/app/sharedUI](./app/sharedUI/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./app/sharedUI/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./app/sharedUI/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./app/sharedUI/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## What this is
 
-* [/core](./core/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./core/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+Two threads share one repo. The first is a KMP e-commerce client across Android, iOS, web (js and wasmJs), with a Ktor backend. The second is the dev process around it: branch protection without admin bypass, an issue-first CI gate, structured issue forms, and a path toward a GitHub Actions LLM agent that triages issues without merge authority. The aim is to make the open-source practice itself part of the showcase, alongside the product code.
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+## Modules
 
-### Running the apps
+| Module | Role |
+|---|---|
+| `app/androidApp` | Android entry point |
+| `app/iosApp` | iOS entry point (Xcode project; consumes the shared framework) |
+| `app/webApp` | Web entry point (Compose Multiplatform; js and wasmJs targets) |
+| `app/sharedUI` | UI shared across platforms (Compose Multiplatform) |
+| `app/sharedLogic` | Non-UI shared code |
+| `core` | Lowest-layer shared module |
+| `server` | Ktor backend |
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+For triage, modules group into area labels: `area:android`, `area:ios` (the Xcode app and iOS source sets, not a Gradle module), `area:web`, `area:server`, `area:shared` (covers `core`, `app/sharedLogic`, `app/sharedUI`), and `area:dev-process` for tooling.
 
-- Android app: `./gradlew :app:androidApp:assembleDebug`
+## Stack
+
+- Kotlin Multiplatform with Compose Multiplatform UI
+- Ktor server
+- Gradle 9 + Amazon Corretto 21
+- detekt + Android Lint + per-platform compile in CI
+
+## Running
+
+- Android: `./gradlew :app:androidApp:assembleDebug`
 - Server: `./gradlew :server:run`
-- Web app:
-  - Wasm target (faster, modern browsers): `./gradlew :app:webApp:wasmJsBrowserDevelopmentRun`
-  - JS target (slower, supports older browsers): `./gradlew :app:webApp:jsBrowserDevelopmentRun`
-- iOS app: open the [/app/iosApp](./app/iosApp) directory in Xcode and run it from there.
+- Web (wasm, faster): `./gradlew :app:webApp:wasmJsBrowserDevelopmentRun`
+- Web (js, older browsers): `./gradlew :app:webApp:jsBrowserDevelopmentRun`
+- iOS: open [`/app/iosApp`](./app/iosApp) in Xcode and run.
 
-### Running tests
+## Tests
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+- Android: `./gradlew :app:sharedUI:testAndroidHostTest :app:sharedLogic:testAndroidHostTest`
+- Server: `./gradlew :server:test`
+- Web (wasm): `./gradlew :app:sharedUI:wasmJsTest :app:sharedLogic:wasmJsTest`
+- Web (js): `./gradlew :app:sharedUI:jsTest :app:sharedLogic:jsTest`
+- iOS: `./gradlew :app:sharedLogic:iosSimulatorArm64Test`
 
-- Android tests: `./gradlew :app:sharedUI:testAndroidHostTest :app:sharedLogic:testAndroidHostTest`
-- Server tests: `./gradlew :server:test`
-- Web tests:
-  - Wasm target: `./gradlew :app:sharedUI:wasmJsTest :app:sharedLogic:wasmJsTest`
-  - JS target: `./gradlew :app:sharedUI:jsTest :app:sharedLogic:jsTest`
-- iOS tests: `./gradlew :app:sharedLogic:iosSimulatorArm64Test`
+## Contributing
 
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Every PR links an issue opened beforehand through one of the [issue forms](../../issues/new/choose); bot PRs are exempt automatically.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+## Roadmap
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+Process maturity, in phases:
+
+- [x] **Phase 0: Foundation.** CI gates, branch protection, issue-first PR flow, contributor surface.
+- [ ] **Phase 1: LLM PM agent.** A GitHub Actions agent that triages issues and labels them, talks over Telegram, and never merges.
+- [ ] **Phase 2: Security hardening.** Prompt-injection-safe agent surface, pinned action SHAs, CodeQL, SECURITY.md.
+
+The product surface (catalog, product detail, cart, checkout) develops in parallel; short-term execution lives in the owner's working notes.
+
+## License
+
+[Apache-2.0](./LICENSE).
