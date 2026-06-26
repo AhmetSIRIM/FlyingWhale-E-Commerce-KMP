@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  // Renovate's recommended preset. By extending it, every supported package manager is activated
+  // by scanning files in the repo: the Gradle version catalog and build scripts, GitHub Actions
+  // workflows and composite actions, Dockerfiles, npm, and so on. One line covers what would
+  // otherwise need a separate ecosystem block per surface.
+  "extends": ["config:recommended"],
+  // Renovate creates the label if it does not exist and applies it to every PR it opens.
+  "labels": ["dependencies"],
+  // Cron form for a precise slot: Monday 09:00 in the timezone below. Renovate dispatches when its
+  // own cycle ticks and the cron expression is true, so the wall-clock match is near-exact.
+  "schedule": ["0 9 * * 1"],
+  // Local time for the schedule above; Renovate falls back to UTC if this is absent.
+  "timezone": "Europe/Istanbul",
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      // Kotlin core (compiler, plugins, kotlin-test). The (\\.|:|$) tail keeps kotlinx libraries out of this group.
+      "matchPackagePatterns": ["^org\\.jetbrains\\.kotlin(\\.|:|$)"],
+      "groupName": "kotlin"
+    },
+    {
+      "matchPackagePatterns": ["^org\\.jetbrains\\.compose"],
+      "groupName": "compose-multiplatform"
+    },
+    {
+      "matchPackagePatterns": ["^io\\.ktor"],
+      "groupName": "ktor"
+    },
+    {
+      "matchPackagePatterns": ["^androidx\\."],
+      "groupName": "androidx"
+    },
+    {
+      "matchPackagePatterns": ["^io\\.gitlab\\.arturbosch\\.detekt"],
+      "groupName": "detekt"
+    },
+    {
+      "matchPackagePatterns": ["^com\\.android\\."],
+      "groupName": "agp"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    // Empty schedule lifts the weekly cap so vulnerability fixes can land any time.
+    "labels": ["dependencies", "security"],
+    "schedule": []
+  }
+}
