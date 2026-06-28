@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
+    id("flyingwhale.detekt")
 }
 
 group = "com.flyingwhale.ecommerce"
