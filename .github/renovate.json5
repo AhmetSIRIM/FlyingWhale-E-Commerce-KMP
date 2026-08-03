@@ -7,9 +7,9 @@
   "extends": ["config:recommended"],
   // Renovate creates the label if it does not exist and applies it to every PR it opens.
   "labels": ["dependencies"],
-  // Cron form for a precise slot: Monday 09:00 in the timezone below. Renovate dispatches when its
+  // Cron form for a precise slot: Monday 03:00 in the timezone below. Renovate dispatches when its
   // own cycle ticks and the cron expression is true, so the wall-clock match is near-exact.
-  "schedule": ["0 9 * * 1"],
+  "schedule": ["0 3 * * 1"],
   // Local time for the schedule above; Renovate falls back to UTC if this is absent.
   "timezone": "Europe/Istanbul",
   "prConcurrentLimit": 5,
