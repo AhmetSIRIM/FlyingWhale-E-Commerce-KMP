@@ -32,6 +32,9 @@ captures/
 .cxx/
 *.hprof
 
+# ── Local working notes ──
+docs/
+
 # ── OS / Editors ──
 .DS_Store
 *~
