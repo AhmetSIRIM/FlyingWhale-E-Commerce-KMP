@@ -15,30 +15,70 @@
   // Local time for the schedule above; Renovate falls back to UTC if this is absent.
   "timezone": "Europe/Istanbul",
   "prConcurrentLimit": 5,
+  // Grouping shape mirrors the one the Dependabot configurations in the fleet
+  // settled on: a quiet week should cost one review, not six.
+  //
+  // Two axes decide which PR an update lands in. Update type comes first:
+  // minor and patch collapse into a single PR, while a major keeps a PR of its
+  // own, because a breaking change earns a read that a bundle would bury.
+  // Manager comes second: a library bump changes how the product behaves and an
+  // action bump changes how CI behaves, so they stay in separate PRs and a red
+  // check keeps pointing at one of the two rather than both.
+  //
+  // The family rules below carry majors only. For minor and patch they would be
+  // redundant: everything already travels in one PR, so lockstep across a
+  // family holds for free. A major is where lockstep has to be stated, since
+  // the Kotlin plugins, the Compose plugin and the Ktor artifacts each break if
+  // one moves without its siblings.
+  //
+  // The cost of this shape, accepted knowingly: one failing dependency reddens
+  // the whole grouped PR and the healthy updates inside it cannot merge without
+  // it. When that happens the offender gets pinned or ignored deliberately,
+  // which is a better prompt than six PRs nobody reads.
+  //
+  // The update-type sets are disjoint, so rule order carries no meaning here
+  // and a later rule cannot silently capture an earlier one.
   "packageRules": [
     {
-      // Kotlin core (compiler, plugins, kotlin-test). The (\\.|:|$) tail keeps kotlinx libraries out of this group.
+      "matchManagers": ["gradle"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "gradle-minor-and-patch"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "actions-minor-and-patch"
+    },
+    {
+      // Kotlin core (compiler, plugins, kotlin-test). The (\\.|:|$) tail keeps kotlinx and
+      // kotlin-wrappers out of this group.
       "matchPackageNames": ["/^org\\.jetbrains\\.kotlin(\\.|:|$)/"],
+      "matchUpdateTypes": ["major"],
       "groupName": "kotlin"
     },
     {
       "matchPackageNames": ["/^org\\.jetbrains\\.compose/"],
+      "matchUpdateTypes": ["major"],
       "groupName": "compose-multiplatform"
     },
     {
       "matchPackageNames": ["/^io\\.ktor/"],
+      "matchUpdateTypes": ["major"],
       "groupName": "ktor"
     },
     {
       "matchPackageNames": ["/^androidx\\./"],
+      "matchUpdateTypes": ["major"],
       "groupName": "androidx"
     },
     {
       "matchPackageNames": ["/^io\\.gitlab\\.arturbosch\\.detekt/"],
+      "matchUpdateTypes": ["major"],
       "groupName": "detekt"
     },
     {
       "matchPackageNames": ["/^com\\.android\\./"],
+      "matchUpdateTypes": ["major"],
       "groupName": "agp"
     }
   ],
