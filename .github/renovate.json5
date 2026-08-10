@@ -1,50 +1,21 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  // Renovate's recommended preset. By extending it, every supported package manager is activated
-  // by scanning files in the repo: the Gradle version catalog and build scripts, GitHub Actions
-  // workflows and composite actions, Dockerfiles, npm, and so on. One line covers what would
-  // otherwise need a separate ecosystem block per surface.
-  "extends": ["config:recommended"],
-  // Renovate creates the label if it does not exist and applies it to every PR it opens.
-  "labels": ["dependencies"],
-  // A window, not an instant. Renovate checks a repository every few hours rather than on a clock
-  // tick, and it has no minute granularity, so a schedule narrower than that interval is skipped
-  // more often than it is hit. Four hours from 03:00 keeps the intended early-Monday slot while
-  // staying wide enough for a check to land inside it.
-  "schedule": ["after 3am and before 7am on monday"],
-  // Local time for the schedule above; Renovate falls back to UTC if this is absent.
-  "timezone": "Europe/Istanbul",
-  "prConcurrentLimit": 5,
-  "packageRules": [
-    {
-      // Kotlin core (compiler, plugins, kotlin-test). The (\\.|:|$) tail keeps kotlinx libraries out of this group.
-      "matchPackageNames": ["/^org\\.jetbrains\\.kotlin(\\.|:|$)/"],
-      "groupName": "kotlin"
-    },
-    {
-      "matchPackageNames": ["/^org\\.jetbrains\\.compose/"],
-      "groupName": "compose-multiplatform"
-    },
-    {
-      "matchPackageNames": ["/^io\\.ktor/"],
-      "groupName": "ktor"
-    },
-    {
-      "matchPackageNames": ["/^androidx\\./"],
-      "groupName": "androidx"
-    },
-    {
-      "matchPackageNames": ["/^io\\.gitlab\\.arturbosch\\.detekt/"],
-      "groupName": "detekt"
-    },
-    {
-      "matchPackageNames": ["/^com\\.android\\./"],
-      "groupName": "agp"
-    }
+  // Presets rather than local rules, deliberately. Every grouping this repository
+  // needs already ships with Renovate, and a hand-written copy of a preset drifts
+  // from upstream while still having to be maintained here. `configMigration` goes
+  // one step further: Renovate opens a pull request against this file when an
+  // option it uses is superseded, so the file's upkeep belongs to the tool.
+  //
+  // `group:allNonMajor` puts every minor and patch update in one pull request and
+  // leaves a major on its own, which is where a breaking change earns a read of
+  // its own. Grouping across managers is part of the preset: a version catalog
+  // bump and a Gradle wrapper bump travel together.
+  "extends": [
+    "config:recommended",
+    "group:allNonMajor",
+    "schedule:weekly"
   ],
-  "vulnerabilityAlerts": {
-    // Empty schedule lifts the weekly cap so vulnerability fixes can land any time.
-    "labels": ["dependencies", "security"],
-    "schedule": []
-  }
+  "timezone": "Europe/Istanbul",
+  "labels": ["dependencies"],
+  "configMigration": true
 }
