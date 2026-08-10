@@ -7,36 +7,38 @@
   "extends": ["config:recommended"],
   // Renovate creates the label if it does not exist and applies it to every PR it opens.
   "labels": ["dependencies"],
-  // Cron form for a precise slot: Monday 03:00 in the timezone below. Renovate dispatches when its
-  // own cycle ticks and the cron expression is true, so the wall-clock match is near-exact.
-  "schedule": ["0 3 * * 1"],
+  // A window, not an instant. Renovate checks a repository every few hours rather than on a clock
+  // tick, and it has no minute granularity, so a schedule narrower than that interval is skipped
+  // more often than it is hit. Four hours from 03:00 keeps the intended early-Monday slot while
+  // staying wide enough for a check to land inside it.
+  "schedule": ["after 3am and before 7am on monday"],
   // Local time for the schedule above; Renovate falls back to UTC if this is absent.
   "timezone": "Europe/Istanbul",
   "prConcurrentLimit": 5,
   "packageRules": [
     {
       // Kotlin core (compiler, plugins, kotlin-test). The (\\.|:|$) tail keeps kotlinx libraries out of this group.
-      "matchPackagePatterns": ["^org\\.jetbrains\\.kotlin(\\.|:|$)"],
+      "matchPackageNames": ["/^org\\.jetbrains\\.kotlin(\\.|:|$)/"],
       "groupName": "kotlin"
     },
     {
-      "matchPackagePatterns": ["^org\\.jetbrains\\.compose"],
+      "matchPackageNames": ["/^org\\.jetbrains\\.compose/"],
       "groupName": "compose-multiplatform"
     },
     {
-      "matchPackagePatterns": ["^io\\.ktor"],
+      "matchPackageNames": ["/^io\\.ktor/"],
       "groupName": "ktor"
     },
     {
-      "matchPackagePatterns": ["^androidx\\."],
+      "matchPackageNames": ["/^androidx\\./"],
       "groupName": "androidx"
     },
     {
-      "matchPackagePatterns": ["^io\\.gitlab\\.arturbosch\\.detekt"],
+      "matchPackageNames": ["/^io\\.gitlab\\.arturbosch\\.detekt/"],
       "groupName": "detekt"
     },
     {
-      "matchPackagePatterns": ["^com\\.android\\."],
+      "matchPackageNames": ["/^com\\.android\\./"],
       "groupName": "agp"
     }
   ],
