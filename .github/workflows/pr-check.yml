@@ -52,7 +52,7 @@ jobs:
             task: compileKotlinIosArm64 compileKotlinIosSimulatorArm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up build environment
         uses: ./.github/actions/setup-kmp
       - name: Build (${{ matrix.platform }})
@@ -64,7 +64,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up build environment
         uses: ./.github/actions/setup-kmp
       - name: Android Lint
@@ -76,7 +76,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up build environment
         uses: ./.github/actions/setup-kmp
       - name: Detekt (all source sets)
