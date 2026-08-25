@@ -1,21 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  // Presets rather than local rules, deliberately. Every grouping this repository
-  // needs already ships with Renovate, and a hand-written copy of a preset drifts
-  // from upstream while still having to be maintained here. `configMigration` goes
-  // one step further: Renovate opens a pull request against this file when an
-  // option it uses is superseded, so the file's upkeep belongs to the tool.
-  //
-  // `group:allNonMajor` puts every minor and patch update in one pull request and
-  // leaves a major on its own, which is where a breaking change earns a read of
-  // its own. Grouping across managers is part of the preset: a version catalog
-  // bump and a Gradle wrapper bump travel together.
   "extends": [
     "config:recommended",
-    "group:allNonMajor",
-    "schedule:weekly"
+    "group:allNonMajor"
   ],
-  "timezone": "Europe/Istanbul",
   "labels": ["dependencies"],
   "configMigration": true
 }
