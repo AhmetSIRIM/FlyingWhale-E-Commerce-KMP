@@ -1,0 +1,58 @@
+# Regenerates lock files on Renovate's branches. A version bump can change a lock
+# that only Gradle can produce, and hosted Renovate runs no commands, so PR Check
+# would fail on the stale lock.
+name: Lock Sync
+
+on:
+  push:
+    branches:
+      - 'renovate/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Runs the bumped, not yet reviewed build, so it holds no write credential.
+  regenerate:
+    name: Regenerate lock files
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up build environment
+        uses: ./.github/actions/setup-kmp
+      - name: Regenerate yarn locks (js + wasmJs)
+        run: ./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock --stacktrace
+      - name: Upload lock files
+        uses: actions/upload-artifact@v7
+        with:
+          name: kotlin-js-store
+          path: kotlin-js-store
+          if-no-files-found: error
+
+  commit:
+    name: Commit lock files
+    needs: regenerate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # A push made with the default GITHUB_TOKEN starts no workflow run, so the
+      # new commit would never get PR Check.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.LOCK_SYNC_TOKEN }}
+      - name: Download lock files
+        uses: actions/download-artifact@v8
+        with:
+          name: kotlin-js-store
+          path: kotlin-js-store
+      - name: Commit and push lock files
+        run: scripts/commit-lock-files.sh kotlin-js-store

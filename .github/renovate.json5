@@ -5,5 +5,8 @@
     "group:allNonMajor"
   ],
   "labels": ["dependencies"],
+  // The Lock Sync workflow commits under this identity; without this entry
+  // Renovate stops updating a branch it has committed to.
+  "gitIgnoredAuthors": ["41898282+github-actions[bot]@users.noreply.github.com"],
   "configMigration": true
 }
