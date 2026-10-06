@@ -6,6 +6,9 @@
 # Uses pull_request_target so the workflow can mutate issues on fork PRs too
 # (pull_request from a fork is downgraded to a read-only token). Safe because
 # the workflow never checks out the PR head and never executes head code.
+# GitHub blocks this event in public repositories by default; the repository's
+# Actions policy "Allow pull_request_target for issue assignment" allows it for
+# this workflow file only, so a rename of this file needs the policy updated.
 name: Assign issue on PR open
 
 on:
