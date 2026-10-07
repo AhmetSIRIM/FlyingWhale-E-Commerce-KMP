@@ -8,9 +8,11 @@ on:
     branches:
       - 'renovate/**'
 
+# The run's own push starts another run on the same branch. Queuing instead of
+# cancelling lets the first run finish; the second finds nothing to commit.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
